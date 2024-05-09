@@ -1,0 +1,69 @@
+package generic;
+
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+
+import javax.imageio.ImageIO;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.io.FileHandler;
+
+public class UI_Testing {
+    public static void main(String[] args) throws IOException {
+        System.setProperty("webdriver.chrome.driver", "./softwares/chromedriver.exe");
+        WebDriver driver = new ChromeDriver();
+        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+        driver.manage().window().maximize();
+        driver.get("https://www.getcalley.com/page-sitemap.xml");
+        driver.findElement(By.xpath("//a[@href='https://www.getcalley.com/']"))
+              .click();
+        
+        // Take screenshot
+        TakesScreenshot s = (TakesScreenshot) driver;
+        File srcFile = s.getScreenshotAs(OutputType.FILE);
+        
+        // Resize and save screenshots with different resolutions
+        saveScreenshotWithResolution(srcFile, driver, "Hp Pavilion_Chrome_1", 1536, 864);
+        saveScreenshotWithResolution(srcFile, driver, "Hp Pavilion_Chrome_2", 1920, 1080);
+        saveScreenshotWithResolution(srcFile, driver, "Hp Pavilion_Chrome_3", 1366, 768);
+        
+        driver.quit();
+    }
+
+    // Method to resize and save screenshot with specified resolution
+    private static void saveScreenshotWithResolution(File srcFile, WebDriver driver, String deviceName, int width, int height) throws IOException {
+        File resizedScreenshot = resizeScreenshot(srcFile, width, height);
+        
+        // Save screenshot with device name and resolution
+        String fileName = "C:\\Users\\SOHAIL\\Desktop\\Afternoon_Selenium\\Screenshot\\" 
+                            + deviceName + "_" + width + "x" + height + "_screenshot.jpeg";
+        FileHandler.copy(resizedScreenshot, new File(fileName));
+        
+        // Print current date
+        Date currentDate = new Date();
+        String formattedDate = currentDate.toString().replace(":", "-");
+        System.out.println("Screenshot taken on: " + formattedDate + " with device: " + deviceName + " and resolution: " + width + "x" + height);
+    }
+
+    // Method to resize screenshot
+    private static File resizeScreenshot(File srcFile, int width, int height) throws IOException {
+        BufferedImage originalImage = ImageIO.read(srcFile);
+        BufferedImage resizedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = resizedImage.createGraphics();
+        g.drawImage(originalImage, 0, 0, width, height, null);
+        g.dispose();
+
+        File resizedFile = new File("resizedScreenshot.jpeg");
+        ImageIO.write(resizedImage, "jpeg", resizedFile);
+
+        return resizedFile;
+    }
+}
